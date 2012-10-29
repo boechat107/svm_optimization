@@ -29,11 +29,7 @@ X = [X1; X2];
 % Labels
 Y = [ones(m/2, 1); -1*ones(m/2,1)];
 
-%% SVM formulation
-cvx_begin
-    variables w(1,n) b(1)
-    minimize(pow_pos(norm(w, 2), 2))
-    - Y .* (X * w' + ones(m,1)*b) + ones(m,1) <= zeros(m,1);
-cvx_end
+%% Solving the SVM problem using the primal formulation.
+[w, b] = svm_primal(X, Y);
 
 plotSVMlinear(X, Y, w, b)
