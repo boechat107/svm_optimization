@@ -36,14 +36,4 @@ cvx_begin
     - Y .* (X * w' + ones(m,1)*b) + ones(m,1) <= zeros(m,1);
 cvx_end
 
-t_min = min(X(:,1)) - 1;
-t_max = max(X(:,1)) + 1;
-tt = linspace(t_min, t_max, 100);
-H = - (w(1)*tt + b)/w(2);
-% Plot training data
-figure
-plot(X1(:,1), X1(:,2), 'ro', 'MarkerFaceColor', 'r')
-hold on;
-plot(X2(:,1), X2(:,2), 'b^', 'MarkerFaceColor', 'b')
-plot(tt, H, '-g')
-hold off;
+plotSVMlinear(X, Y, w, b)
