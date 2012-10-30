@@ -8,9 +8,9 @@
 \usepackage{float}
 \usepackage{ctable}
 \usepackage{colortbl}
-
-
 \usepackage{pgfpages}
+\usepackage{cancel}
+\usepackage{minted}
 
 \mode<presentation>
 {
@@ -43,7 +43,7 @@
 }
 
 % Define o tema da apresentacao (soh fica guardado nas informacoes do pdf)
-\subject{Detecção de drift em sensores}
+\subject{SVM optimization}
 % Delete this, if you do not want the table of contents to pop up at
 % the beginning of each subsection:
 % \AtBeginSubsection[]
@@ -62,9 +62,8 @@
 %\setbeameroption{show notes on second screen=right}
 %============================================================================================
 
-\title
-[Algoritmos para a Detecção de \textit{Drifting} em Sensores de Poços de Petróleo]
-{Algoritmos para a Detecção de \textit{Drifting} em Sensores de Poços de Petróleo}
+\title{Linear Hard Margin SVM for Classification and Pattern Recognition}
+
 
 \author[Boechat A.A.]
 { 
@@ -78,7 +77,7 @@ Catarina}
 %}
 
 % Se comentar a linha abaixo, ira aparecer a data quando foi compilada a apresentacao
-\date{Florianópolis, Agosto de 2012}
+\date{Florianópolis, October 2012}
 
 \setbeamercolor{postit}{fg=black,bg=block body.fg!75!black!10!bg}
 % =========================================================================================
@@ -88,14 +87,10 @@ Catarina}
     \titlepage
     \thispagestyle{empty}
 
-    \note{
-    \begin{itemize}
-        \item trabalho de mestrado sob orientação do prof. Ubirajara
-    \end{itemize}}
 \end{frame}
 
 
-\begin{frame}{Sumário}
+\begin{frame}{Contents}
     \tableofcontents[]
 \end{frame}
 
@@ -285,12 +280,13 @@ Catarina}
     %% have 
 
     \begin{block}{Dual problem}
+        \vspace{-.4cm}
         \begin{equation}
             \begin{array}{ll}
                 \max_\lambda & g(\lambda) = \sum\limits^m_{i=1} \lambda_i -
                 \frac{1}{2} \sum\limits^m_{i,j=1} \lambda_i \lambda_j y^{(i)} y^{(j)}
                 \left< \mathbf{x}^{(i)}, \mathbf{x}^{(j)} \right> \\[.2cm]
-                & \sum\limits^m_{i=1} \lambda_i y^{(i)} = 0 \\[.2cm]
+                & \sum\limits^m_{i=1} \lambda_i y^{(i)} = 0 \\[.3cm]
                 & \lambda_i \ge 0
             \end{array}
         \end{equation}
@@ -325,6 +321,163 @@ Catarina}
 
 
 \begin{frame}{Karush-Kuhn-Tucker Conditions}
+
+    Solving the SVM problem is equivalent to finding a solution to the KKT conditions.
+    \cite{Burges1998}
+    
+    \vspace{-.3cm}
+    \begin{eqnarray}
+        f_i(\mathbf{w}) = - y^{(i)} (\mathbf{w}^T \mathbf{x}^{(i)} + b) + 1  \le & 0
+        \nonumber\\
+        %\cancel{h_i(\mathbf{w}) & = & 0} \\[.2cm]
+        \lambda_i  \ge & 0 \nonumber\\
+        \lambda_i f_i(\mathbf{w}) = \lambda_i \left[ -y^{(i)} (\mathbf{w}^T
+            \mathbf{x}^{(i)} + b) + 1 \right]  = & 0 \label{det_b}\\
+        \frac{\partial}{\partial \mathbf{w}} \mathcal{L} = \mathbf{w} -
+        \sum\limits^m_{i=1} \lambda_i  y^{(i)} \mathbf{x}^{(i)}  = & 0\nonumber\\
+        \frac{\partial}{\partial b} \mathcal{L} = \sum\limits^m_{i=1} \lambda_i y^{(i)} =
+        & 0\nonumber
+    \end{eqnarray}
+
+    Equation \eqref{det_b} is used to determine the $b$ value.\\[.3cm]
+
+    \emph{\colorbox{blue!20!white}{``If $\tilde{\mathbf{w}}, \tilde{b}, \tilde{\lambda}$ satisfy
+    KKT for a convex problem, then they are optimal''}}
+
+\end{frame}
+
+
+\section{Code}
+
+\begin{frame}{Tools}
+    \begin{itemize}
+        \item SVM solvers/packages
+            \begin{itemize}
+                \item \href{http://www.csie.ntu.edu.tw/~cjlin/libsvm/}{LIBSVM}
+                \item \href{http://svmlight.joachims.org/}{SVM light}
+                \item \href{http://www.isis.ecs.soton.ac.uk/resources/svminfo/}{Matlab SVM
+                    toolbox}
+                \item List of softwares:\\
+                    \href{http://www.support-vector-machines.org/SVM_soft.html}
+                    {www.support-vector-machines.org/SVM\_soft.html}
+            \end{itemize}
+        \vspace{.5cm}
+        \item \href{http://cvxr.com/cvx/}{\alert{CVX}}, a convex modeling framework for Matlab
+            \begin{itemize}
+                \item problem description very similar to the mathematical formulation
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Dataset Example}
+
+    \begin{minted}[fontsize=\scriptsize]{matlab}
+%% Linear separable data samples generation for training.
+% Features dimension
+n = 2;
+% Number of samples
+m = 2*30;
+% Center of the classes
+c1 = [2 2];
+c2 = [4 4];
+% Standard deviation from center
+stdc = [.4 .4];
+% Data samples -> X is MxN
+X1 = repmat(c1, m/2, 1) + repmat(stdc, m/2, 1) .* randn(m/2, n);
+X2 = repmat(c2, m/2, 1) + repmat(stdc, m/2, 1) .* randn(m/2, n);
+X = [X1; X2]; 
+% Labels -> Y is Mx1
+Y = [ones(m/2, 1); -1*ones(m/2,1)];
+    \end{minted}
+\end{frame}
+
+
+\begin{frame}{Linear Separable Dataset}
+    \begin{figure}[!htb]
+        \centering
+        \includegraphics[width=.9\textwidth]{figures/dataset.eps}
+    \end{figure}
+\end{frame}
+
+\begin{frame}[fragile]{SVM Primal Problem}
+    \begin{minted}[fontsize=\scriptsize]{matlab}
+function [w, b] = svm_primal(X, Y)
+
+[m, n] = size(X);
+%% SVM formulation
+cvx_begin
+    variables w(1,n) b(1)
+    minimize(pow_pos(norm(w, 2), 2))
+    - Y .* (X * w' + ones(m,1)*b) + ones(m,1) <= zeros(m,1);
+cvx_end
+    \end{minted}
+\end{frame}
+
+
+\begin{frame}[fragile]{SVM Dual Problem}
+    \begin{minted}[fontsize=\scriptsize]{matlab}
+function [w, b] = svm_lagrangian(X, Y)
+
+[m, n] = size(X);
+%% Dual problem of the Lagrangian formulation.
+Z = repmat(Y, 1, n) .* X;
+H = Z * Z'; % MxM matrix
+cvx_begin
+    variables lambda(m, 1)
+    %maximize ( sum(lambda) - .5 * lambda' * H * lambda )
+    maximize ( sum(lambda) - .5 * quad_form(lambda, H) )
+    lambda'*Y == 0;
+    lambda >= zeros(m, 1);
+cvx_end
+
+% w is 1xN
+w = (lambda .* Y)' * X;
+% Non-zero lagrangian multipliers.
+l1 = find(lambda > 1e-6 & Y == 1);
+l2 = find(lambda > 1e-6 & Y == -1);
+% b calculation as Gunn1998 suggested.
+b = - .5 * w * (X(l1(1), :) + X(l2(1), :))';
+    \end{minted}
+\end{frame}
+
+\begin{frame}{Problem Solution}
+    \begin{figure}[!htb]
+        \centering
+        \includegraphics[width=.9\textwidth]{figures/solution.eps}
+    \end{figure}
+\end{frame}
+
+\begin{frame}[fragile]
+    \scriptsize
+    \begin{verbatim}
+-------------------------------------------------------------------
+ number of iterations   = 22
+ primal objective value = -2.01515477e+00
+ dual   objective value = -2.01515479e+00
+ gap := trace(XZ)       = 1.58e-08
+ relative gap           = 3.13e-09
+ actual relative gap    = 3.13e-09
+ rel. primal infeas     = 2.76e-12
+ rel. dual   infeas     = 1.00e-12
+ Total CPU time (secs)  = 0.61  
+ CPU time per iteration = 0.03  
+ termination code       =  0
+-------------------------------------------------------------------
+ number of iterations   = 14
+ primal objective value = -1.00757737e+00
+ dual   objective value = -1.00757740e+00
+ gap := trace(XZ)       = 3.09e-08
+ relative gap           = 1.02e-08
+ actual relative gap    = 1.02e-08
+ rel. primal infeas     = 1.56e-12
+ rel. dual   infeas     = 1.01e-12
+ Total CPU time (secs)  = 0.20  
+ CPU time per iteration = 0.01  
+ termination code       =  0
+-------------------------------------------------------------------
+    \end{verbatim}
+    
     
 \end{frame}
 
@@ -332,6 +485,16 @@ Catarina}
 \section{Conclusions}
 
 \begin{frame}{Conclusions}
+    \begin{itemize}
+        \item SVM is a famous technique for classification problems
+        \item The SVM problem consists in looking for separating hyperplane with the
+            largest margins 
+        \item It leads to a convex problem 
+        \item There are advantages in using the Lagrangian formulation 
+        \item The solution of the dual problem is optimal (KKT conditions)
+        \item With a little modification, the presented formulation can handle more
+            complex problems
+    \end{itemize}
     
 \end{frame}
 
