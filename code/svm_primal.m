@@ -7,6 +7,8 @@ function [w, b] = svm_primal(X, Y)
 %     X is the training dataset.
 %     Y is the label vector.
 %     [w, b] are the hyperplane parameters, the solution of the SVM problem.
+%     w is 1xN vector.
+%     b is a real value.
 
 [m, n] = size(X);
 

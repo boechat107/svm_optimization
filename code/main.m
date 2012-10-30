@@ -22,14 +22,18 @@ c1 = [2 2];
 c2 = [4 4];
 % Standard deviation from center
 stdc = [.4 .4];
-% Data samples
+% Data samples -> X is MxN
 X1 = repmat(c1, m/2, 1) + repmat(stdc, m/2, 1) .* randn(m/2, n);
 X2 = repmat(c2, m/2, 1) + repmat(stdc, m/2, 1) .* randn(m/2, n);
 X = [X1; X2]; 
-% Labels
+% Labels -> Y is Mx1
 Y = [ones(m/2, 1); -1*ones(m/2,1)];
 
 %% Solving the SVM problem using the primal formulation.
 [w, b] = svm_primal(X, Y);
-
 plotSVMlinear(X, Y, w, b)
+
+%% Solving the SVM problem using the dual formulation.
+[w, b] = svm_lagrangian(X, Y);
+plotSVMlinear(X, Y, w, b)
+
