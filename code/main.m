@@ -29,6 +29,8 @@ X = [X1; X2];
 % Labels -> Y is Mx1
 Y = [ones(m/2, 1); -1*ones(m/2,1)];
 
+plotData(X, Y)
+
 %% Solving the SVM problem using the primal formulation.
 [w, b] = svm_primal(X, Y);
 plotSVMlinear(X, Y, w, b)
